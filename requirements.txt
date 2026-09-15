@@ -1,0 +1,5 @@
+Flask
+flask-cors
+gTTS
+pypdf
+gunicorn
