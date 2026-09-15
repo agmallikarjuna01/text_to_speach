@@ -1,0 +1,391 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vocalis | Text to Speech</title>
+    <style>
+        :root {
+            --ink: #17231f;
+            --muted: #66726d;
+            --paper: #f7f8f3;
+            --panel: rgba(255, 255, 255, 0.86);
+            --line: #dce4dc;
+            --accent: #e86f51;
+            --accent-dark: #bf4e35;
+            --teal: #277d74;
+            --shadow: 0 24px 70px rgba(30, 55, 43, 0.12);
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            color: var(--ink);
+            background: var(--paper);
+            font-family: Georgia, "Times New Roman", serif;
+        }
+
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background: radial-gradient(circle at 12% 12%, rgba(232, 111, 81, 0.16), transparent 28%),
+                        radial-gradient(circle at 90% 88%, rgba(39, 125, 116, 0.14), transparent 32%);
+        }
+
+        .shell {
+            position: relative;
+            width: min(1080px, calc(100% - 40px));
+            margin: 0 auto;
+            padding: 30px 0 54px;
+        }
+
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 76px;
+        }
+
+        .brand {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            font-weight: 700;
+            letter-spacing: 0.02em;
+        }
+
+        .brand-mark {
+            display: grid;
+            width: 38px;
+            height: 38px;
+            place-items: center;
+            color: #fff;
+            background: var(--teal);
+            border-radius: 12px 12px 12px 4px;
+            font-family: Arial, sans-serif;
+            font-size: 18px;
+        }
+
+        .eyebrow {
+            color: var(--accent-dark);
+            font: 700 11px/1.2 Arial, sans-serif;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+        }
+
+        .hero {
+            max-width: 720px;
+            margin-bottom: 38px;
+        }
+
+        h1 {
+            max-width: 700px;
+            margin: 10px 0 16px;
+            font-size: clamp(42px, 7vw, 78px);
+            font-weight: 400;
+            line-height: 0.96;
+            letter-spacing: -0.045em;
+        }
+
+        .hero p {
+            max-width: 550px;
+            margin: 0;
+            color: var(--muted);
+            font: 16px/1.6 Arial, sans-serif;
+        }
+
+        .workspace {
+            display: grid;
+            grid-template-columns: minmax(0, 1.08fr) minmax(300px, 0.92fr);
+            gap: 18px;
+            align-items: stretch;
+        }
+
+        .panel {
+            padding: 28px;
+            background: var(--panel);
+            border: 1px solid rgba(220, 228, 220, 0.9);
+            border-radius: 18px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(12px);
+        }
+
+        .panel-heading {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            align-items: baseline;
+            margin-bottom: 22px;
+        }
+
+        h2 {
+            margin: 0;
+            font-size: 25px;
+            font-weight: 400;
+        }
+
+        .step {
+            color: var(--muted);
+            font: 700 11px Arial, sans-serif;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .drop-zone {
+            display: block;
+            padding: 27px 20px;
+            text-align: center;
+            border: 1.5px dashed #aec5bb;
+            border-radius: 12px;
+            background: #f2f7f1;
+            cursor: pointer;
+            transition: border-color 160ms ease, background 160ms ease, transform 160ms ease;
+        }
+
+        .drop-zone:hover, .drop-zone.is-dragging {
+            border-color: var(--teal);
+            background: #eaf4ee;
+            transform: translateY(-2px);
+        }
+
+        .upload-icon {
+            display: grid;
+            width: 44px;
+            height: 44px;
+            margin: 0 auto 13px;
+            place-items: center;
+            color: var(--teal);
+            background: #d8ebe1;
+            border-radius: 50%;
+            font: 700 21px Arial, sans-serif;
+        }
+
+        .drop-zone strong { display: block; font-size: 17px; font-weight: 400; }
+        .drop-zone span { display: block; margin-top: 7px; color: var(--muted); font: 12px Arial, sans-serif; }
+        #file { display: none; }
+
+        .file-name {
+            min-height: 18px;
+            margin: 12px 0 0;
+            color: var(--teal);
+            font: 12px Arial, sans-serif;
+            text-align: center;
+        }
+
+        .divider {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            margin: 21px 0;
+            color: #9aa49e;
+            font: 11px Arial, sans-serif;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+        }
+
+        .divider::before, .divider::after { content: ""; height: 1px; flex: 1; background: var(--line); }
+
+        textarea {
+            width: 100%;
+            min-height: 126px;
+            resize: vertical;
+            padding: 14px;
+            color: var(--ink);
+            font: 15px/1.5 Arial, sans-serif;
+            background: #fff;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            outline: none;
+        }
+
+        textarea:focus { border-color: var(--teal); box-shadow: 0 0 0 3px rgba(39, 125, 116, 0.12); }
+
+        .convert {
+            width: 100%;
+            margin-top: 18px;
+            padding: 15px 20px;
+            color: #fff;
+            background: var(--accent);
+            border: 0;
+            border-radius: 9px;
+            cursor: pointer;
+            font: 700 13px Arial, sans-serif;
+            letter-spacing: 0.06em;
+            text-transform: uppercase;
+            transition: background 160ms ease, transform 160ms ease;
+        }
+
+        .convert:hover { background: var(--accent-dark); transform: translateY(-1px); }
+        .convert:disabled { cursor: wait; opacity: 0.65; transform: none; }
+
+        .result-panel {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 100%;
+            background: var(--teal);
+            border-color: transparent;
+            color: #fff;
+        }
+
+        .result-panel .step { color: #b9ded4; }
+        .result-copy { margin: 54px 0 30px; }
+        .result-copy h2 { font-size: 35px; line-height: 1.05; }
+        .result-copy p { max-width: 270px; margin: 13px 0 0; color: #cce1da; font: 14px/1.55 Arial, sans-serif; }
+        audio { width: 100%; }
+        .status { min-height: 20px; margin: 12px 0 0; color: var(--muted); font: 12px Arial, sans-serif; }
+        .result-panel .status { color: #cce1da; }
+
+        @media (max-width: 720px) {
+            .shell { width: min(100% - 28px, 520px); padding-top: 20px; }
+            header { margin-bottom: 50px; }
+            .workspace { grid-template-columns: 1fr; }
+            .panel { padding: 22px; }
+            .result-panel { min-height: 260px; }
+            .result-copy { margin: 30px 0 25px; }
+        }
+    </style>
+</head>
+<body>
+    <main class="shell">
+        <header>
+            <div class="brand"><span class="brand-mark">V</span><span>Vocalis</span></div>
+            <span class="eyebrow">Text to voice</span>
+        </header>
+
+        <section class="hero">
+            <span class="eyebrow">Give your words a voice</span>
+            <h1>Listen to what you have written.</h1>
+            <p>Turn notes, documents, and PDFs into clear spoken audio in a single click.</p>
+        </section>
+
+        <section class="workspace">
+            <div class="panel">
+                <div class="panel-heading"><h2>Choose your text</h2><span class="step">01 / input</span></div>
+                <label class="drop-zone" id="dropZone" for="file">
+                    <span class="upload-icon">↑</span>
+                    <strong>Drop a document here</strong>
+                    <span>PDF or TXT, up to any readable length</span>
+                    <input type="file" id="file" accept=".txt,.pdf,text/plain,application/pdf">
+                </label>
+                <p class="file-name" id="fileName">No document selected</p>
+                <div class="divider">or write directly</div>
+                <textarea id="name" placeholder="Paste or type something to hear..."></textarea>
+                <button class="convert" id="convertButton" onclick="processData()">Create audio <span>→</span></button>
+                <p class="status" id="status" aria-live="polite"></p>
+            </div>
+
+            <div class="panel result-panel">
+                <div class="panel-heading"><h2>Your audio</h2><span class="step">02 / listen</span></div>
+                <div class="result-copy">
+                    <h2 id="resultTitle">Your voice is waiting.</h2>
+                    <p id="result">Choose a file or add text, then your audio will appear here.</p>
+                </div>
+                <audio id="audio" controls hidden></audio>
+            </div>
+        </section>
+    </main>
+
+    <script>
+        const fileInput = document.getElementById("file");
+        const dropZone = document.getElementById("dropZone");
+        const fileName = document.getElementById("fileName");
+        const textInput = document.getElementById("name");
+        const status = document.getElementById("status");
+        const button = document.getElementById("convertButton");
+
+        fileInput.addEventListener("change", () => {
+            fileName.textContent = fileInput.files[0]?.name || "No document selected";
+        });
+
+        ["dragenter", "dragover"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.add("is-dragging");
+        }));
+
+        ["dragleave", "drop"].forEach((eventName) => dropZone.addEventListener(eventName, (event) => {
+            event.preventDefault();
+            dropZone.classList.remove("is-dragging");
+        }));
+
+        dropZone.addEventListener("drop", (event) => {
+            fileInput.files = event.dataTransfer.files;
+            fileName.textContent = fileInput.files[0]?.name || "No document selected";
+        });
+
+        async function processData() {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            button.disabled = true;
+            button.innerHTML = "Creating audio...";
+            status.textContent = "Preparing your words...";
+
+            if (file) {
+                formData.append("file", file);
+            } else {
+                formData.append("name", textInput.value);
+            }
+
+            try {
+                const response = await fetch("http://127.0.0.1:5000/api/convert", { method: "POST", body: formData });
+                if (!response.ok) {
+                    const error = await response.json();
+                    throw new Error(error.error || "Unable to create audio.");
+                }
+
+                const audio = document.getElementById("audio");
+                audio.src = URL.createObjectURL(await response.blob());
+                audio.hidden = false;
+                document.getElementById("resultTitle").textContent = "Ready to listen.";
+                document.getElementById("result").textContent = "Your spoken version is ready below.";
+                status.textContent = "Audio created successfully.";
+                await audio.play();
+            } catch (error) {
+                status.textContent = error.message;
+            } finally {
+                button.disabled = false;
+                button.innerHTML = "Create audio <span>→</span>";
+            }
+        }
+    </script>
+</body>
+</html>
+
+async function processData() {
+
+    const name = document.getElementById("name").value;
+    const file = document.getElementById("file").files[0];
+    const formData = new FormData();
+
+    if (file) {
+        formData.append("file", file);
+    } else {
+        formData.append("name", name);
+    }
+
+    const response = await fetch("http://127.0.0.1:5000/api/convert", {
+        method: "POST",
+        body: formData
+    });
+
+    if (!response.ok) {
+        const error = await response.json();
+        document.getElementById("result").innerText = error.error || "Unable to create audio.";
+        return;
+    }
+
+    const audioBlob = await response.blob();
+    const audio = document.getElementById("audio");
+    audio.src = URL.createObjectURL(audioBlob);
+    audio.hidden = false;
+    await audio.play();
+}
+
+</script>
+
+<p id="result"></p>
+<audio id="audio" controls hidden></audio>
